@@ -16,6 +16,10 @@ mysql -uroot -proot -h127.0.0.1 -e "create database opsx character set utf8 coll
 ```sh
 # 迁移数据库
 python3 manage.py migrate
+python3 manage.py makemigrations public
+python3 manage.py makemigrations monitor
+python3 manage.py migrate
+
 
 # 运行
 python3 manage.py runserver
