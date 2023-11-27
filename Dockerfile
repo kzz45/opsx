@@ -4,7 +4,11 @@ LABEL maintainer="kzz45@qq.com"
 
 WORKDIR /code
 
-COPY . .
+COPY opsx .
+COPY public .
+COPY monitor .
+COPY manage.py .
+COPY requirements.txt .
 
 RUN pip install -r ./requirements.txt
 

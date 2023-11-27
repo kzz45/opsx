@@ -40,4 +40,16 @@ npm run dev
 
 ## monitorx_proxy 代理端
 
+```sh
+cd monitorx_proxy
+
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o monitor_proxy
+```
+
 ## monitorx_client 客户端
+
+```sh
+cd monitorx_client
+
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o monitor_client
+```
