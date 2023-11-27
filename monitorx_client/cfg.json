@@ -1,0 +1,27 @@
+{
+    "debug": true,
+    "uuid": "kongzz",
+    "listen_port": 2021,
+    "clean_time": 5,
+    "expire_time": 10,
+    "interval_time": 60,
+    "monitor_server": "",
+    "base_node": {
+        "port": 9100,
+        "name": "/bin/node_exporter",
+        "args": ""
+    },
+    "redis_node": {
+        "port": 9102,
+        "name": "/bin/redis_exporter",
+        "args": ""
+    },
+    "mysql_node": {
+        "port": 9150,
+        "name": "/bin/mysqld_exporter",
+        "args": "--collect.slave_status --collect.info_schema.processlist --collect.info_schema.tables.databases=\"information_schema|mysql|performance_schema\""
+    },
+    "logs": "logs",
+    "magic": "magic",
+    "plugin": "plugin"
+}

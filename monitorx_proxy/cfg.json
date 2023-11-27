@@ -1,0 +1,42 @@
+{
+  "debug": true,
+  "uuid": "sh",
+  "bin_dir": "bin",
+  "tpl_dir": "tpl",
+  "conf_dir": "conf",
+  "temp_dir": "temp",
+  "log_file": "monitor.log",
+  "self_health_check": true,
+  "monitor_server": {
+    "server_addr": "http://127.0.0.1:8080",
+    "access_id": "kongzz",
+    "access_key": "kongzz",
+    "secret_key": "django-insecure-@@f72v+qzoxdjf+u^*j7f7ye&*3)xmcr*yjdloocj76u$o4rup",
+    "timeout": 50,
+    "interval": 60,
+    "heartbeat": 60
+  },
+  "redis_server": {
+    "redis_addr": "127.0.0.1",
+    "redis_port": 6379,
+    "redis_pass": "root",
+    "redis_db": 1
+  },
+  "notice_server": {
+    "enable": true,
+    "addr": "0.0.0.0",
+    "port": 5454
+  },
+  "prometheus_server": {
+    "enable": true,
+    "addr": "0.0.0.0",
+    "port": 9090,
+    "prom_data_dir": "prom_data"
+  },
+  "alertmanager_server": {
+    "enable": true,
+    "addr": "0.0.0.0",
+    "port": 9093,
+    "alert_data_dir": "alert_data"
+  }
+}

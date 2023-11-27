@@ -1,6 +1,6 @@
 # opsx
 
-## monitorx
+## monitorx 后端
 
 ```sh
 # MySQL
@@ -27,7 +27,7 @@ python3 manage.py runserver
 python3 manage.py createsuperuser
 ```
 
-## monitorx_frontend
+## monitorx_frontend 前端
 
 ```sh
 cd monitorx_frontend
@@ -37,3 +37,7 @@ npm install -D
 # 运行开发环境
 npm run dev
 ```
+
+## monitorx_proxy 代理端
+
+## monitorx_client 客户端
