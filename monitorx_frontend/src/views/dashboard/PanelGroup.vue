@@ -43,7 +43,7 @@
             </div>
           </div>
         </el-col>
-        <el-col
+        <!-- <el-col
           :span="6"
           class="card-panel-col"
         >
@@ -61,8 +61,8 @@
               <span class="card-panel-num">{{ k8s_num }}</span>
             </div>
           </div>
-        </el-col>
-        <el-col
+        </el-col> -->
+        <!-- <el-col
           :span="6"
           class="card-panel-col"
         >
@@ -80,13 +80,13 @@
               <span class="card-panel-num">{{ k8s_num }}</span>
             </div>
           </div>
-        </el-col>
+        </el-col> -->
       </el-row>
       <el-row
         :gutter="40"
         class="panel-group"
       >
-        <el-col
+        <!-- <el-col
           :span="6"
           class="card-panel-col"
         >
@@ -104,8 +104,8 @@
               <span class="card-panel-num">{{ k8s_num }}</span>
             </div>
           </div>
-        </el-col>
-        <el-col
+        </el-col> -->
+        <!-- <el-col
           :span="6"
           class="card-panel-col"
         >
@@ -123,7 +123,7 @@
               <span class="card-panel-num">{{ k8s_num }}</span>
             </div>
           </div>
-        </el-col>
+        </el-col> -->
       </el-row>
     </el-card>
   </div>

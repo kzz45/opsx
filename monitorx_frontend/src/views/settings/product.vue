@@ -147,7 +147,7 @@
         </el-tab-pane>
         <!-- Jenkins管理--------------------------------------------------  -->
         <!-- v-permission="['admin']" -->
-        <el-tab-pane
+        <!-- <el-tab-pane
           v-if="checkPermission(['admin'])"
           label="Jenkins管理"
           name="jenkins_settings"
@@ -225,9 +225,9 @@
             :limit.sync="list_query.limit"
             @pagination="get_jenkins_list"
           ></pagination>
-        </el-tab-pane>
+        </el-tab-pane> -->
         <!-- Gitlab管理--------------------------------------------------  -->
-        <el-tab-pane
+        <!-- <el-tab-pane
           name="gitlab_settings"
           label="Gitlab管理"
         >
@@ -300,7 +300,7 @@
             :limit.sync="list_query.limit"
             @pagination="get_gitlab_list"
           ></pagination>
-        </el-tab-pane>
+        </el-tab-pane> -->
       </el-tabs>
     </el-card>
     <!-- 产品管理dialog--------------------------------------------------  -->

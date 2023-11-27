@@ -42,26 +42,26 @@ const settingsRoute = [
           roles: ["admin"],
         },
       },
-      {
-        path: "park",
-        name: "Park",
-        component: () => import("@/views/settings/park"),
-        meta: {
-          title: "园区管理",
-          icon: "park",
-          roles: ["admin"],
-        },
-      },
-      {
-        path: "audit",
-        name: "Audit",
-        component: () => import("@/views/settings/audit"),
-        meta: {
-          title: "操作审计",
-          icon: "audit",
-          roles: ["admin"],
-        },
-      },
+      // {
+      //   path: "park",
+      //   name: "Park",
+      //   component: () => import("@/views/settings/park"),
+      //   meta: {
+      //     title: "园区管理",
+      //     icon: "park",
+      //     roles: ["admin"],
+      //   },
+      // },
+      // {
+      //   path: "audit",
+      //   name: "Audit",
+      //   component: () => import("@/views/settings/audit"),
+      //   meta: {
+      //     title: "操作审计",
+      //     icon: "audit",
+      //     roles: ["admin"],
+      //   },
+      // },
       {
         hidden: true,
         path: "profile",
