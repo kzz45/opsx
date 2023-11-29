@@ -4,12 +4,20 @@
       :is-active="sidebar.opened"
       class="hamburger-container"
       @toggleClick="toggleSideBar"
-    />
+    ></hamburger>
 
-    <breadcrumb class="breadcrumb-container" />
-
+    <breadcrumb class="breadcrumb-container"></breadcrumb>
     <div class="right-menu">
-      <global-product style="margin-right: 10px; vertical-align: top"></global-product>
+      <!-- <GlobalNotice
+        class="right-menu-item hover-effect"
+        style="margin-right: 10px"
+      ></GlobalNotice> -->
+      <screenfull
+        class="right-menu-item hover-effect"
+        style="margin-right: 10px"
+      ></screenfull>
+      <!-- <global-search style="width: 200px; vertical-align: top"></global-search> -->
+      <global-product style="width: 200px; margin-left: 10px; vertical-align: top"></global-product>
       <el-dropdown
         class="avatar-container"
         trigger="click"
@@ -25,14 +33,16 @@
           slot="dropdown"
           class="user-dropdown"
         >
-          <router-link to="/">
-            <el-dropdown-item>个人中心</el-dropdown-item>
+          <router-link to="/settings/profile">
+            <el-dropdown-item>
+              个人中心
+            </el-dropdown-item>
           </router-link>
           <el-dropdown-item
             divided
             @click.native="logout"
           >
-            <span style="display: block">退出登录</span>
+            <span style="display:block;">退出登录</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -41,27 +51,37 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex"
-import Breadcrumb from "@/components/Breadcrumb"
-import Hamburger from "@/components/Hamburger"
-import GlobalProduct from '@/components/Product'
+import { mapGetters } from 'vuex'
+import Breadcrumb from '@/components/Breadcrumb'
+import Hamburger from '@/components/Hamburger'
+import Screenfull from '@/components/Screenfull'
+import GlobalProduct from '@/components/Global/Product'
+// import GlobalNotice from '@/components/Global/Notice'
+// import GlobalSearch from '@/components/Global/Search'
 
 export default {
   components: {
     Breadcrumb,
     Hamburger,
-    GlobalProduct
+    Screenfull,
+    GlobalProduct,
+    // GlobalNotice
+    // GlobalSearch
   },
   computed: {
-    ...mapGetters(["sidebar", "avatar"])
+    ...mapGetters([
+      'sidebar',
+      'avatar'
+    ])
   },
   methods: {
     toggleSideBar() {
-      this.$store.dispatch("app/toggleSideBar")
+      this.$store.dispatch('app/toggleSideBar')
     },
     async logout() {
-      await this.$store.dispatch("user/logout")
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      await this.$store.dispatch('user/logout')
+      // this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      this.$router.push(`/logout`)
     }
   }
 }

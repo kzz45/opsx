@@ -1,35 +1,30 @@
 <template>
-  <div class="dashboard-container">
-    <PanelGroup></PanelGroup>
+  <div class="dashboard-editor-container">
+    <panel-group></panel-group>
   </div>
 </template>
 
 <script>
 import PanelGroup from './PanelGroup'
-import { mapGetters } from "vuex"
 
 export default {
-  name: "Dashboard",
+  name: 'DashboardAdmin',
   components: {
     PanelGroup
   },
-  computed: {
-    ...mapGetters(["name"]),
-    roles() {
-      return this.$store.getters.roles
+  data() {
+    return {
     }
+  },
+  methods: {
   }
 }
 </script>
 
-<style lang="scss" scoped>
-.dashboard {
-  &-container {
-    margin: 30px;
-  }
-  &-text {
-    font-size: 30px;
-    line-height: 46px;
-  }
+<style lang="scss">
+.dashboard-editor-container {
+  padding: 32px;
+  // background-color: rgb(240, 242, 245);
+  position: relative;
 }
 </style>

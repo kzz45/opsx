@@ -1,0 +1,3 @@
+配置文件的模板文件
+
+包括Prometheus alertmanager

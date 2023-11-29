@@ -2,33 +2,33 @@
 
 import request from "@/utils/request";
 
-export function getUserGroupList(params) {
+export function getCmdbUserGroupList(param) {
   return request({
-    url: "/api/public/user_group/",
+    url: "/api/cmdb/user_group/",
     method: "get",
-    params: params,
+    params: param
   });
 }
 
-export function createUserGroup(data) {
+export function createCmdbUserGroup(data) {
   return request({
-    url: "/api/public/user_group/",
+    url: "/api/cmdb/user_group/",
     method: "post",
-    data: data,
+    data: data
   });
 }
 
-export function updateUserGroup(id, data) {
+export function deleteCmdbUserGroup(id) {
   return request({
-    url: "/api/public/user_group/" + id + "/",
+    url: `/api/cmdb/user_group/${id}`,
+    method: "delete"
+  });
+}
+
+export function updateCmdbUserGroup(id, data) {
+  return request({
+    url: `/api/cmdb/user_group/${id}/`,
     method: "patch",
-    data: data,
-  });
-}
-
-export function deleteUserGroup(id) {
-  return request({
-    url: "/api/public/user_group/" + id + "/",
-    method: "delete",
+    data: data
   });
 }

@@ -10,7 +10,6 @@
         class="sidebar-logo-link"
         to="/"
       >
-        <!-- <img v-if="logo" :src="logo" class="sidebar-logo"> -->
         <img
           v-if="logo"
           src="@/assets/walle.png"
@@ -27,13 +26,21 @@
         class="sidebar-logo-link"
         to="/"
       >
-        <!-- <img v-if="logo" :src="logo" class="sidebar-logo"> -->
+        <!-- <img
+          v-if="logo"
+          :src="logo"
+          class="sidebar-logo"
+        > -->
         <img
           v-if="logo"
           src="@/assets/walle.png"
           class="sidebar-logo"
         >
-
+        <!-- <img
+          v-if="logo"
+          src="../../../../public/devops.png"
+          class="sidebar-logo"
+        > -->
         <h1 class="sidebar-title">{{ title }} </h1>
       </router-link>
     </transition>

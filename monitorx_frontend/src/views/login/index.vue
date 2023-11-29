@@ -42,83 +42,103 @@
           auto-complete="on"
           @keyup.enter.native="handleLogin"
         />
-        <span
-          class="show-pwd"
-          @click="showPwd"
-        >
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+        <span class="show-pwd" @click="showPwd">
+          <svg-icon
+            :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'"
+          />
         </span>
       </el-form-item>
 
       <el-button
         :loading="loading"
         type="primary"
-        style="width: 100%; margin-bottom: 30px"
+        style="width:100%;margin-bottom:30px;"
         @click.native.prevent="handleLogin"
-      >登录</el-button>
+        >登录</el-button
+      >
     </el-form>
+    <el-dialog title="三方登录" :visible.sync="showDialog">
+      <br />
+      <social-sign></social-sign>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+// import SocialSign from "./components/social_login";
 
 export default {
   name: "Login",
+  // components: { SocialSign },
   data() {
+    const validatePassword = (rule, value, callback) => {
+      if (value.length < 6) {
+        callback(new Error("The password can not be less than 6 digits"));
+      } else {
+        callback();
+      }
+    };
     return {
       loginForm: {
-        username: "kongzz",
-        password: "kongzz"
+        username: "",
+        password: ""
       },
+      showDialog: false,
       loginRules: {
-        username: [{ required: true, trigger: "blur" }],
-        password: [{ required: true, trigger: "blur" }]
+        username: [
+          { required: true, trigger: "blur", message: "请输入用户名" }
+        ],
+        password: [
+          { required: true, trigger: "blur", validator: validatePassword }
+        ]
       },
       loading: false,
       passwordType: "password",
-      redirect: undefined
-    }
+      redirect: undefined,
+    };
   },
   watch: {
     $route: {
-      handler: function (route) {
-        this.redirect = route.query && route.query.redirect
+      handler: function(route) {
+        this.redirect = route.query && route.query.redirect;
       },
       immediate: true
     }
   },
+  created() {},
   methods: {
     showPwd() {
       if (this.passwordType === "password") {
-        this.passwordType = ""
+        this.passwordType = "";
       } else {
-        this.passwordType = "password"
+        this.passwordType = "password";
       }
       this.$nextTick(() => {
-        this.$refs.password.focus()
-      })
+        this.$refs.password.focus();
+      });
     },
     handleLogin() {
-      this.$refs.loginForm.validate((valid) => {
+      // window.location.href = this.idaas_url
+      this.$refs.loginForm.validate(valid => {
         if (valid) {
-          this.loading = true
+          // console.log(this.loginForm, 'login form')
+          this.loading = true;
           this.$store
             .dispatch("user/login", this.loginForm)
             .then(() => {
-              this.$router.push({ path: this.redirect || "/" })
-              this.loading = false
+              this.$router.push({ path: this.redirect || "/" });
+              this.loading = false;
             })
             .catch(() => {
-              this.loading = false
-            })
+              this.loading = false;
+            });
         } else {
-          console.log("error submit!!")
-          return false
+          return false;
         }
-      })
+      });
     }
   }
-}
+};
 </script>
 
 <style lang="scss">

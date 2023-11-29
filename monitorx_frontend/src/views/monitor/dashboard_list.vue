@@ -1,3 +1,5 @@
+仪表盘页面
+
 <template>
   <div class="app-container">
     <el-card class="box-card">
@@ -11,7 +13,7 @@
                 placement="top"
               >
                 <div slot="content">
-                  {{ item.desc }}
+                  {{ item.describe }}
                 </div>
                 <div
                   class="dashboard-div"
@@ -20,7 +22,7 @@
                   <el-button
                     style="width: 100%"
                     plain
-                    @click="view_dashboard(item.addr)"
+                    @click="view_dashboard(item.url)"
                   >
                     <div class="dashboard-button-div">
                       <div class="dashboard-div-icon">
@@ -56,13 +58,26 @@
 </template>
 
 <script>
-import { getDashboardList } from '@/views/monitor/apis/dashboard'
+import { mapGetters } from 'vuex'
+import { getDashboardList } from '@/views/monitor/api/dashboard'
 
 export default {
   name: "DashboardList",
   data() {
     return {
+      list_query: {
+        page: 1,
+        limit: 999
+      },
       dashboard_list: []
+    }
+  },
+  computed: {
+    ...mapGetters(['current_select_product_id', 'current_select_product_name'])
+  },
+  watch: {
+    current_select_product_id: function () {
+      this.get_dashboard_list()
     }
   },
   created() {
@@ -73,7 +88,15 @@ export default {
       window.open(url, "_blank")
     },
     get_dashboard_list() {
-      getDashboardList({ limit: 100 })
+      const params = "product__id__in"
+      this.list_query[params] = this.current_select_product_id
+      // 如果是选择的产品是全部【0】就展示全部
+      if (this.current_select_product_id === 0) {
+        this.list_query[params] = ""
+      } else {
+        this.list_query[params] = this.current_select_product_id
+      }
+      getDashboardList(this.list_query)
         .then(resp => {
           this.dashboard_list = resp.data.results
         })
