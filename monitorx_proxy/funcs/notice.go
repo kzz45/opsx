@@ -71,83 +71,56 @@ func notice_receive(c *gin.Context) {
 }
 
 func parse_notice(notification AlertManagerNotification) error {
-	g.Logger.Infof("[状态]:%s [等级]:%s [告警名称]:%s [接收人]:%s [告警数量]:%d [告警消息]:%v\n",
+	// g.Logger.Errorf("notification: %v\n", notification)
+	webhook, _ := get_user_group_webhook(notification.Receiver)
+
+	endpoints := make([]string, 0)
+	for _, alert := range notification.Alerts {
+		endpoints = append(endpoints, alert.Labels["_endpoint"])
+	}
+	endpoints_str := strings.Join(endpoints, ",")
+	g.Logger.Errorf("[状态]:%s [等级]:%s [告警名称]:%s [接收人]:%s [告警实例]:%s [告警数量]: %d\n",
 		notification.Status,
 		notification.CommonLabels["level"],
 		notification.CommonLabels["alertname"],
-		notification.Receiver,
+		webhook.Name,
+		endpoints_str,
 		len(notification.Alerts),
-		notification.Alerts[len(notification.Alerts)-1].Annotations)
+	)
 	// 全部告警
 	if err := g.AlertsRPush("alerts", notification); err != nil {
 		g.Logger.Errorf("push all alert message to redis error: %v", err)
 		return nil
 	}
-	// 合并告警
-	var notice_msg_merge NoticeMsg
-	notice_msg_merge.Receiver = notification.Receiver
-	notice_msg_merge.StartsAt = time.Now().Format("2006-01-02 15:04:05")
-	notice_msg_merge.Level = notification.CommonLabels["level"]
-	notice_msg_merge.AlertNum = len(notification.Alerts)
-	if notification.Status == "firing" {
-		notice_msg_merge.MergeStatus = "崩盘"
-	} else if notification.Status == "resolved" {
-		notice_msg_merge.MergeStatus = "恢复"
+	var group_notification AlertManagerNotification
+	// 同类超过5个就合并了
+	if len(notification.Alerts) > 5 {
+		group_notification = AlertManagerNotification{
+			Receiver:          notification.Receiver,
+			Status:            notification.Status,
+			GroupLabels:       notification.GroupLabels,
+			CommonLabels:      notification.CommonLabels,
+			CommonAnnotations: notification.CommonAnnotations,
+			ExternalURL:       notification.ExternalURL,
+			Alerts:            notification.Alerts,
+		}
+		feishu_group(group_notification, webhook.WebHook)
 	} else {
-		notice_msg_merge.MergeStatus = notification.Status
+		feishu(notification, webhook.WebHook)
 	}
-	alert_status := make(map[string]int)
-	alert_products := make(map[string]int)
-	// 每一条告警 日志存储
-	for _, alert := range notification.Alerts {
-		// 每一条告警 日志存储 (供前端大屏显示)
-		if err := g.AlertsRPush("endpoints", alert); err != nil {
-			g.Logger.Errorf("push each alert message to redis error: %v", err)
-		}
-		status := alert.Status
-		product_name := alert.Labels["_product_name"]
-		if _, ok := alert_products[product_name]; ok {
-			alert_products[product_name] += 1
-		} else {
-			alert_products[product_name] = 1
-		}
-		if _, ok := alert_status[status]; ok {
-			alert_status[status] += 1
-		} else {
-			alert_status[status] = 1
-		}
-	}
-	var product_str_list []string
-	for k, v := range alert_products {
-		product_str := fmt.Sprintf("%s=%d", k, v)
-		product_str_list = append(product_str_list, product_str)
-	}
-	var status_str_list []string
-	for k, v := range alert_status {
-		status_str := fmt.Sprintf("%s=%d", k, v)
-		status_str_list = append(status_str_list, status_str)
-	}
-	notice_msg_merge.AlertStatus = alert_status
-	notice_msg_merge.AlertStatusStr = strings.Join(status_str_list, ",")
-	notice_msg_merge.AlertProduct = alert_products
-	notice_msg_merge.AlertProductStr = strings.Join(product_str_list, ",")
-	notice_msg_merge.CommonLabels = notification.CommonLabels
-	notice_msg_merge.CommonAnnotations = notification.CommonAnnotations
-	webhook, _ := get_user_group_webhook(notification.Receiver)
-	wechat_original(notification, webhook)
 	return nil
 }
 
-func wechat_original(notification AlertManagerNotification, webhook string) bool {
+func feishu(notification AlertManagerNotification, webhook string) bool {
 	for _, alert := range notification.Alerts {
-		var wechat_msg WeChatMsg
-		wechat_msg.MsgType = "markdown"
-		markdown_content := make(map[string]string)
-		if notification.Status == "firing" {
-			markdown_content["content"] = fmt.Sprintf(
-				"告警等级: <font color =\"warning\">%s</font>\n告警状态: <font color =\"warning\">%s</font>\n告警名称: %s\n告警时间: %s\n告警概述: %s\n告警产品: %s\n告警实例: %s\n实例名称: %s\n",
-				"崩盘",
-				notification.Status,
+		var feishu_msg FeiShuMsg
+		feishu_msg.MsgType = "interactive"
+		if notification.Status == "firing" && alert.Labels["level"] == "crit" {
+			feishu_msg.Card.Header.Template = "red"
+			feishu_msg.Card.Header.Title.Content = fmt.Sprintf("崩盘 - %s - %s", alert.Labels["_product_name"], alert.Annotations["summary"])
+			feishu_msg.Card.Header.Title.Tag = "plain_text"
+			content := fmt.Sprintf(
+				"**告警名称**: %s\n**告警时间**: %s\n**告警概述**: %s\n**告警产品**: %s\n**告警实例**: %s\n**实例名称**: %s\n",
 				notification.CommonLabels["alertname"],
 				time.Now().Format("2006-01-02 15:04:05"),
 				alert.Annotations["summary"],
@@ -155,38 +128,167 @@ func wechat_original(notification AlertManagerNotification, webhook string) bool
 				alert.Labels["_endpoint"],
 				alert.Labels["_name"],
 			)
-		} else if notification.Status == "resolved" {
-			markdown_content["content"] = fmt.Sprintf(
-				"告警等级: <font color =\"info\">%s</font>\n告警状态: <font color =\"info\">%s</font>\n告警名称: %s\n恢复时间: %v\n告警概述: %s\n告警产品: %s\n告警实例: %s\n实例名称: %s\n",
-				"恢复",
-				notification.Status,
-				notification.CommonLabels["alertname"],
-				time.Now().Format("2006-01-02 15:04:05"),
-				alert.Annotations["summary"],
-				alert.Labels["_product_name"],
-				alert.Labels["_endpoint"],
-				alert.Labels["_name"],
-			)
-		}
+			field := FieldContent{
+				IsShort: true,
+				Text:    ContentTag{Tag: "lark_md", Content: content},
+			}
 
-		wechat_msg.MarkDown = markdown_content
-		msg_body, err := json.Marshal(wechat_msg)
+			fields := make([]FieldContent, 0)
+			fields = append(fields, field)
+			element := CardElement{
+				Tag:    "div",
+				Fields: fields,
+			}
+			elements := make([]CardElement, 0)
+			elements = append(elements, element)
+			feishu_msg.Card.Elements = elements
+
+		} else if notification.Status == "resolved" {
+			feishu_msg.Card.Header.Template = "green"
+			feishu_msg.Card.Header.Title.Content = fmt.Sprintf("恢复 - %s - %s ", alert.Labels["_product_name"], alert.Annotations["summary"])
+			feishu_msg.Card.Header.Title.Tag = "plain_text"
+			content := fmt.Sprintf(
+				"**告警名称**: %s\n**恢复时间**: %s\n**告警概述**: %s\n**告警产品**: %s\n**告警实例**: %s\n**实例名称**: %s\n",
+				notification.CommonLabels["alertname"],
+				time.Now().Format("2006-01-02 15:04:05"),
+				alert.Annotations["summary"],
+				alert.Labels["_product_name"],
+				alert.Labels["_endpoint"],
+				alert.Labels["_name"],
+			)
+			field := FieldContent{
+				IsShort: true,
+				Text:    ContentTag{Tag: "lark_md", Content: content},
+			}
+
+			fields := make([]FieldContent, 0)
+			fields = append(fields, field)
+			element := CardElement{
+				Tag:    "div",
+				Fields: fields,
+			}
+			elements := make([]CardElement, 0)
+			elements = append(elements, element)
+			feishu_msg.Card.Elements = elements
+		}
+		msg_body, err := json.Marshal(feishu_msg)
 		if err != nil {
 			return false
 		}
 		req, err := http.NewRequest("POST", webhook, bytes.NewBuffer(msg_body))
 		req.Header.Set("Content-Type", "application/json")
 		if err != nil {
-			g.Logger.Errorf("make wechat request error: %s", err)
+			g.Logger.Errorf("make feishu request error: %s", err)
 			return false
 		}
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			g.Logger.Errorf("post wechat alert msg error: %s", err)
+			g.Logger.Errorf("post feishu alert msg error: %s", err)
 			return false
 		}
 		defer resp.Body.Close()
 	}
+	return true
+}
+
+func contains(x []string, y string) bool {
+	for _, i := range x {
+		if i == y {
+			return true
+		}
+	}
+	return false
+}
+
+func feishu_group(notification AlertManagerNotification, webhook string) bool {
+	var feishu_msg FeiShuMsg
+	names := make([]string, 0)
+	endpoints := make([]string, 0)
+	summarys := make([]string, 0)
+	feishu_msg.MsgType = "interactive"
+	for _, alert := range notification.Alerts {
+		names = append(names, alert.Labels["_name"])
+		is_contains := contains(summarys, alert.Annotations["summary"])
+		if !is_contains {
+			summarys = append(summarys, alert.Annotations["summary"])
+		}
+		endpoints = append(endpoints, alert.Labels["_endpoint"])
+	}
+	names_str := strings.Join(names, ",")
+	summarys_str := strings.Join(summarys, "\n")
+	endpoints_str := strings.Join(endpoints, ",")
+	if notification.Status == "firing" && notification.CommonLabels["level"] == "crit" {
+		feishu_msg.Card.Header.Template = "red"
+		feishu_msg.Card.Header.Title.Content = fmt.Sprintf("崩盘 - %s - %s - 很多", notification.CommonLabels["_product_name"], notification.CommonLabels["alertname"])
+		feishu_msg.Card.Header.Title.Tag = "plain_text"
+		content := fmt.Sprintf(
+			"**告警名称**: %s\n**告警时间**: %s\n**告警产品**: %s\n**告警概述**: \n%s\n**告警实例**: \n%s\n**实例名称**: %s\n",
+			notification.CommonLabels["alertname"],
+			time.Now().Format("2006-01-02 15:04:05"),
+			notification.CommonLabels["_product_name"],
+			summarys_str,
+			endpoints_str,
+			names_str,
+		)
+		field := FieldContent{
+			IsShort: true,
+			Text:    ContentTag{Tag: "lark_md", Content: content},
+		}
+
+		fields := make([]FieldContent, 0)
+		fields = append(fields, field)
+		element := CardElement{
+			Tag:    "div",
+			Fields: fields,
+		}
+		elements := make([]CardElement, 0)
+		elements = append(elements, element)
+		feishu_msg.Card.Elements = elements
+	} else if notification.Status == "resolved" {
+		feishu_msg.Card.Header.Template = "green"
+		feishu_msg.Card.Header.Title.Content = fmt.Sprintf("恢复 - %s - %s 很多", notification.CommonLabels["_product_name"], notification.CommonLabels["alertname"])
+		feishu_msg.Card.Header.Title.Tag = "plain_text"
+		content := fmt.Sprintf(
+			"**告警名称**: %s\n**恢复时间**: %s\n**告警产品**: %s\n**告警概述**: \n%s\n**告警实例**: %s\n**实例名称**: %s\n",
+			notification.CommonLabels["alertname"],
+			time.Now().Format("2006-01-02 15:04:05"),
+			notification.CommonLabels["_product_name"],
+			summarys_str,
+			endpoints_str,
+			names_str,
+		)
+		field := FieldContent{
+			IsShort: true,
+			Text:    ContentTag{Tag: "lark_md", Content: content},
+		}
+
+		fields := make([]FieldContent, 0)
+		fields = append(fields, field)
+		element := CardElement{
+			Tag:    "div",
+			Fields: fields,
+		}
+		elements := make([]CardElement, 0)
+		elements = append(elements, element)
+		feishu_msg.Card.Elements = elements
+	}
+	msg_body, err := json.Marshal(feishu_msg)
+	if err != nil {
+		return false
+	}
+	req, err := http.NewRequest("POST", webhook, bytes.NewBuffer(msg_body))
+	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		g.Logger.Errorf("make feishu request error: %s", err)
+		return false
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		g.Logger.Errorf("post feishu alert msg error: %s", err)
+		return false
+	}
+	defer resp.Body.Close()
 	return true
 }

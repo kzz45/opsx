@@ -100,6 +100,7 @@ type UserGroupResp struct {
 type UserGroup struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
+	Channel  string `json:"channel"`
 	WebHook  string `json:"webhook"`
 	UserList []User `json:"user_list"`
 }
@@ -147,6 +148,34 @@ type WeChatMsg struct {
 	MarkDown map[string]string `json:"markdown"`
 }
 
+type FeiShuMsg struct {
+	Card    MsgCard `json:"card"`
+	MsgType string  `json:"msg_type"`
+}
+
+type MsgCard struct {
+	Header   CardHeader    `json:"header"`
+	Elements []CardElement `json:"elements"`
+}
+
+type CardHeader struct {
+	Template string `json:"template"`
+	Title    ContentTag
+}
+type ContentTag struct {
+	Content string `json:"content"`
+	Tag     string `json:"tag"`
+}
+
+type CardElement struct {
+	Tag    string         `json:"tag"`
+	Fields []FieldContent `json:"fields"`
+}
+
+type FieldContent struct {
+	IsShort bool       `json:"is_short"`
+	Text    ContentTag `json:"text"`
+}
 type Silence struct {
 	IsChange bool          `json:"is_change"`
 	Data     []SilenceData `json:"data"`
