@@ -31,10 +31,16 @@ python3 manage.py makemigrations dcmdb
 python3 manage.py makemigrations dmonitor
 python3 manage.py migrate
 
+# 创建一个 admin 管理用户 用来前端登录
+python3 manage.py createsuperuser
+
 # 启动后端
 python3 manage.py runserver 0.0.0.0:8000
 
+# 启动正式环境的话 使用 gunicorn
+
 # 下面的操作需要在前端配置好之后再运行，另外下面的脚本需要跑在 crontab 中
+# 本地实践的话直接运行就好
 
 # 生成实例任务
 cd monitorx_backend/crontab
@@ -47,9 +53,6 @@ python3 prometheus_task.py
 # 同步当前告警
 cd monitorx_backend/crontab
 python3 current_alert.py
-
-# 创建 admin 后台管理(非必要)
-python3 manage.py createsuperuser
 ```
 
 ## 前端 (monitorx_frontend)
@@ -61,7 +64,7 @@ rm -rf node_modules
 npm cache clean --force
 npm install -D
 
-# 启动前端 运行开发环境
+# 启动前端 运行本地开发环境
 npm run dev
 
 # 构建正式
@@ -71,6 +74,9 @@ npm run build:prod
 ## 代理端 (monitorx_proxy)
 
 ```sh
+# bin 目录下的二进制文件需要下载 https://prometheus.io/download/
+
+# 代理端需要下载 prometheus/promtool/alertmanager/amtool
 cd monitorx_proxy
 
 # 启动代理端
@@ -83,6 +89,10 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o monitor_proxy
 ## 客户端 (monitorx_client)
 
 ```sh
+# bin 目录下的二进制文件需要下载 https://prometheus.io/download/
+
+# 客户端需要下载 node_exporter
+# 但是我们本地实践的话，直接用 docker 来启动一个好了 bin 目录下就不需要下载 node_exporter 了
 cd monitorx_client
 
 # 由于我 Mac 环境下 node_exporter 启动不了 暂时用 docker 方式启动一个 node_exporter
@@ -95,16 +105,4 @@ go run main.go
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o monitor_client
 ```
 
-## Grafana
-
-```sh
-# Mac 直接安装启动
-brew install grafana
-brew services start grafana
-
-# docker 方式
-docker run -d -p 3000:3000 --name=grafana grafana/grafana-enterprise
-
-# 默认用户名密码: admin/admin
-http://127.0.0.1:3000
-```
+## [前端配置操作步骤](./docs/README.md)
