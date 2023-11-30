@@ -70,12 +70,6 @@
 
 ![监控对象](./录入监控对象.png)
 
-## 告警大屏
-
-告警大屏：显示当前正在告警的产品
-
-![告警大屏](./告警大屏.png)
-
 ## 安装 Grafana
 
 ```sh
@@ -93,10 +87,24 @@ http://127.0.0.1:3000
 
 ## 导入 Dashboard
 
-导入 Grafana Dashboard，我们采用 https://grafana.com/grafana/dashboards/1860-node-exporter-full/ ，但是还需要稍作变量调整
+导入 Grafana Dashboard，我们采用 <https://grafana.com/grafana/dashboards/1860-node-exporter-full/> ，但是还需要稍作变量调整
 
 ![dashboard变量调整](dashboard变量调整.png)
 
-或者直接修改 dashboard 的 JSON 模型， 复制文件 ./docs/node_exporter_full.json
+或者直接修改 dashboard 的 JSON 模型， 复制文件 ./docs/node_exporter_full.json 保存 dashboard
 
 ![dashboard_json_model](dashboard_json_model.png)
+
+## 查看监控
+
+在 Grafana 配置好之后，就可以在前端页面上点击跳转，看实例的监控图了
+
+![查看监控](查看监控.png)
+
+![监控跳转](监控跳转.png)
+
+## 告警大屏
+
+告警大屏：显示当前正在告警的产品
+
+![告警大屏](./告警大屏.png)
