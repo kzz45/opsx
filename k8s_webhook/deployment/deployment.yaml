@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admission-webhook-example-deployment
+  labels:
+    app: admission-webhook-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admission-webhook-example
+  template:
+    metadata:
+      labels:
+        app: admission-webhook-example
+    spec:
+      serviceAccount: admission-webhook-example-sa
+      containers:
+      - name: admission-webhook-example
+        image: admission-webhook-example:v1
+        args:
+        - -tlsCertFile=/etc/webhook/certs/cert.pem
+        - -tlsKeyFile=/etc/webhook/certs/key.pem
+        volumeMounts:
+        - name: webhook-certs
+          mountPath: /etc/webhook/certs
+          readOnly: true
+      volumes:
+      - name: webhook-certs
+        secret:
+          secretName: admission-webhook-example-certs
