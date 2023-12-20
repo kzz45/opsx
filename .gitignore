@@ -173,3 +173,4 @@ tests/**/coverage/
 *.njsproj
 *.sln
 .vscode
+deployment/
