@@ -1,4 +1,4 @@
-module opsx
+module opsx/k8s_webhook
 
 go 1.20
 
