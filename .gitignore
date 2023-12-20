@@ -164,3 +164,5 @@ node_modules/
 monitorx_client/
 monitorx_backend/
 monitorx_frontend/
+mutatingwebhook-ca-bundle.yaml
+validatingwebhook-ca-bundle.yaml
