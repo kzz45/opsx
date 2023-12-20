@@ -1,0 +1,24 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validation-webhook-example-cfg
+  labels:
+    app: admission-webhook-example
+webhooks:
+- name: required-labels.qikqiak.com
+  sideEffects: None
+  admissionReviewVersions: ["v1beta1", "v1"]
+  clientConfig:
+    service:
+      name: admission-webhook-example-svc
+      namespace: default
+      path: "/validate"
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMvakNDQWVhZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJek1USXhPREV5TVRZeE5sb1hEVE16TVRJeE5URXlNVFl4Tmxvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSnlGCnZGSWlZMkMxWXFqTno1bVNxRE01WXkzdk5vbDlBUEtYWVpPR0MvRTJnT3JQcFpEVVpmZmhQZUdyQ1owSDhlZG8KVnQ0RTZYVmMwS3dpOENkWFg5UlhZY0lWV0FpU2Y0Q1p3T3RVanZ6SjR4MDFDaHFOKzdiY1FPbHpNL05JMnJZdQpNZVpPSUcyVGU1SDUvRmdVZ0pHNmUyY2U5QVozT0s2RDNMTkJuQnk4UytuZFI4ZXFUV3BHd3NzQzJyZmFFblVhClkrZ1JGUVRLOVpjT05hUjliQk8vb3BmM0N6SVhsSmVLZi9NQk1IVjJZelZyMGRtUWJPRmJpSm5jN1JmYzgrVnoKRmF5a25abWFlSTlIVW5MajVrd2h0NjJudys1VTRkNUlFcldvSVIyMDB5d2VGVmhnTVVTcmZWWUVZSjk4bUQwRgpvT093akRWQ3oyVlJEYnhZWXFzQ0F3RUFBYU5aTUZjd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0hRWURWUjBPQkJZRUZMVG5QOEU2b2Y2MDVKTXJpL2tmYklWYmltYmxNQlVHQTFVZEVRUU8KTUF5Q0NtdDFZbVZ5Ym1WMFpYTXdEUVlKS29aSWh2Y05BUUVMQlFBRGdnRUJBSDk5UldvMVp5aVdjYjhJdlAzQgpaSkdZcE5KNGpBZHNETWwvZFl1aVgrejAzVmFYVVVFZTJZa3pMWlJvOC8rTGZIK0F5M0NmVmVHcDNwaGpDbGR3CjR6aUVqdnlLZ3JsalBhSE1QOW5OdWo1NmgwbDYvYXZyeC9NTk1ROS9mREhGSG9UWndRVmJlcVdycE1QejZUazQKNFMzNXlibllxb2RtWDhVVElHdU5kMHNGZFFzOEtSS0tKcWk1Q1gyaWNoSjBDN2E0L3BYbWp6QnV3cWNGK2NUdwpiM3VmbURQN3FQSTViKzIxTGdXN25YeVIwWUpnMEx3R2J2dzBVWGNkemlIUFhiKy9LNktzbURJMVFyekFvMlVhCmRSN2hFZ2NrOFExMXd1V1dteUVScWM3aVlZQkdaMHFNT1lueXVLZkV2VFEzSlF1U0o2TVB1aDR3a2lOMjBtSVIKRUNRPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["apps", ""]
+    apiVersions: ["v1"]
+    resources: ["deployments", "services"]
+  namespaceSelector:
+    matchLabels:
+      admission-webhook-example: enabled

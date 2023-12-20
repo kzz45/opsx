@@ -1,0 +1,97 @@
+#!/bin/bash
+WorkSpace="/data/monitor_proxy/"
+cd $WorkSpace
+
+mkdir -p var
+
+name="monitor_proxy"
+pidfile=var/$name.pid
+logfile=var/$name.log
+
+check_pid() {
+    if [ -f $pidfile ]; then
+        pid=$(cat $pidfile)
+        if [ -n $pid ]; then
+            running=$(ps -p $pid | grep -v "PID TTY" | wc -l)
+            return $running
+        fi
+    fi
+    return 0
+}
+
+start() {
+    check_pid
+    running=$?
+    if [ $running -gt 0 ]; then
+        echo -n "$name now is running already, pid="
+        cat $pidfile
+        return 1
+    fi
+
+    nohup ./$name &>$logfile &
+    sleep 1
+    running=$(ps -p $! | grep -v "PID TTY" | wc -l)
+    if [ $running -gt 0 ]; then
+        echo $! >$pidfile
+        echo "$name started ..., pid=$!"
+    else
+        echo "$name failed to start..."
+        return 1
+    fi
+}
+
+stop() {
+    if [ -f $pidfile ]; then
+        pid=$(cat $pidfile)
+        kill $pid >/dev/null
+        rm -f $pidfile >/dev/null
+        echo "$name stoped..."
+    else
+        echo "nothing to do"
+    fi
+
+    for spidfile in $(find $WorkSpace/var -name "*.pid"); do
+        spid=$(cat $spidfile)
+        kill $spid 2>&1 >/dev/null
+        rm -f $spidfile 2>&1 >/dev/null
+    done
+}
+
+restart() {
+    stop
+    start
+}
+
+status() {
+    check_pid
+    running=$?
+    if [ $running -gt 0 ]; then
+        echo started
+    else
+        echo stoped
+    fi
+}
+
+tailf() {
+    tail -f $logfile
+}
+
+function help() {
+    echo "$0 start|stop|restart|status|tail"
+}
+
+if [ "$1" == "" ]; then
+    help
+elif [ "$1" == "stop" ]; then
+    stop
+elif [ "$1" == "start" ]; then
+    start
+elif [ "$1" == "restart" ]; then
+    restart
+elif [ "$1" == "status" ]; then
+    status
+elif [ "$1" == "tail" ]; then
+    tailf
+else
+    help
+fi
